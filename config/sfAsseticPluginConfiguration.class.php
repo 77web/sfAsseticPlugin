@@ -9,15 +9,20 @@
  */
 class sfAsseticPluginConfiguration extends sfPluginConfiguration
 {
+  protected $enableStylesheets = false;
+  protected $enableJavascripts = false;
+  protected $compressStylesheets = false;
+  protected $compressJavascripts = false;
+  
   public function initialize()
   {
     if(sfConfig::get('sf_environment')=='prod')
     {
-      //pending: simplefy settings?
-      sfConfig::set('sfAsseticPlugin_enable_css', true);
-      sfConfig::set('sfAsseticPlugin_compress_css', false);
-      sfConfig::set('sfAsseticPlugin_enable_js', true);
-      sfConfig::set('sfAsseticPlugin_compress_js', false);
+      //pending: read settings from any yaml?
+      $this->enableStylesheets = sfConfig::get('sfAsseticPlugin_enable_css', true);
+      $this->compressStylesheets = sfConfig::get('sfAsseticPlugin_compress_css', false);
+      $this->enableJavascripts = sfConfig::get('sfAsseticPlugin_enable_js', true);
+      $this->compressStylesheets = sfConfig::get('sfAsseticPlugin_compress_js', false);
       
       $this->dispatcher->connect('response.filter_content', array($this, 'listenToResponseFilterContent'));
     }
@@ -27,18 +32,19 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
   {
     $response = sfContext::getInstance()->getResponse();
     
-    if(sfConfig::get('sfAsseticPlugin_enable_css', false))
+    if($this->enableStylesheets)
     {
       $content = $this->embedStylesheets($response, $content);
     }
     
-    if(sfConfig::get('sfAsseticPlugin_enable_js', false))
+    if($this->enableJavascripts)
     {
       $content = $this->embedJavascripts($response, $content);
     }
     
     return $content;
   }
+  
   
   protected function embedStylesheets(sfResponse $response, $content)
   {
@@ -79,9 +85,12 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
       }
       $assetsCss[$mediaType] .= $css;
     }
-    if(sfConfig::get('sfAsseticPlugin_compress_css', false))
+    if($this->compressStylesheets)
     {
-      //pending: compress css here
+      foreach($assetsCss as $mediaType => $css)
+      {
+        $assetsCss[$mediaType] = $this->compressStylesheets($css);
+      }
     }
     $styles = '';
     foreach($assetsCss as $mediaType => $css)
@@ -138,9 +147,9 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
       }
       $assetsJs .= file_get_contents($path);
     }
-    if(sfConfig::get('sfAsseticPlugin_compress_js', false))
+    if($this->compressJavascripts)
     {
-      //pending: compress $asstsJs here
+      $assetsJs = $this->compressJavascripts($assetsJs);
     }
     
     if('' !== $assetsJs)
@@ -163,5 +172,17 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
     }
     
     return $content;
+  }
+  
+  protected function compressJavascripts($script)
+  {
+    //pending: compress js here
+    return $script;
+  }
+  
+  protected function compressStylesheets($css)
+  {
+    //pending: compress css here
+    return $css;
   }
 }
