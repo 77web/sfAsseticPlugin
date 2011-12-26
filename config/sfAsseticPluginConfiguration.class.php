@@ -11,14 +11,14 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
 {
   public function initialize()
   {
-    //pending: simplefy settings?
-    sfConfig::set('sfAsseticPlugin_enable_css', true);
-    sfConfig::set('sfAsseticPlugin_compress_css', false);
-    sfConfig::set('sfAsseticPlugin_enable_js', true);
-    sfConfig::set('sfAsseticPlugin_compress_js', false);
-    
-    if(sfConfig::get('sf_app')=='pc_frontend' && sfConfig::get('sf_environment')=='prod')
+    if(sfConfig::get('sf_environment')=='prod')
     {
+      //pending: simplefy settings?
+      sfConfig::set('sfAsseticPlugin_enable_css', true);
+      sfConfig::set('sfAsseticPlugin_compress_css', false);
+      sfConfig::set('sfAsseticPlugin_enable_js', true);
+      sfConfig::set('sfAsseticPlugin_compress_js', false);
+      
       $this->dispatcher->connect('response.filter_content', array($this, 'listenToResponseFilterContent'));
     }
   }
