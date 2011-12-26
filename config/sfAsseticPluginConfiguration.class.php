@@ -20,9 +20,9 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
     {
       //pending: read settings from any yaml?
       $this->enableStylesheets = sfConfig::get('sfAsseticPlugin_enable_css', true);
-      $this->compressStylesheets = sfConfig::get('sfAsseticPlugin_compress_css', false);
+      $this->compressStylesheets = sfConfig::get('sfAsseticPlugin_compress_css', true);
       $this->enableJavascripts = sfConfig::get('sfAsseticPlugin_enable_js', true);
-      $this->compressStylesheets = sfConfig::get('sfAsseticPlugin_compress_js', false);
+      $this->compressJavascripts = sfConfig::get('sfAsseticPlugin_compress_js', true);
       
       $this->dispatcher->connect('response.filter_content', array($this, 'listenToResponseFilterContent'));
     }
@@ -89,7 +89,7 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
     {
       foreach($assetsCss as $mediaType => $css)
       {
-        $assetsCss[$mediaType] = $this->compressStylesheets($css);
+        $assetsCss[$mediaType] = Minify::minifyStylesheet($css);
       }
     }
     $styles = '';
@@ -149,7 +149,7 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
     }
     if($this->compressJavascripts)
     {
-      $assetsJs = $this->compressJavascripts($assetsJs);
+      $assetsJs = Minify::minifyJavascript($assetsJs);
     }
     
     if('' !== $assetsJs)
@@ -172,17 +172,5 @@ class sfAsseticPluginConfiguration extends sfPluginConfiguration
     }
     
     return $content;
-  }
-  
-  protected function compressJavascripts($script)
-  {
-    //pending: compress js here
-    return $script;
-  }
-  
-  protected function compressStylesheets($css)
-  {
-    //pending: compress css here
-    return $css;
   }
 }
